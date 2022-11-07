@@ -33,8 +33,13 @@ bool isTriplet (uint16_t maybeTriplet) {
 	return isDivisibleBy(TRIPLET_DIVIDER, maybeTriplet);
 }
 
+const uint8_t FIFTH_DIVIDER = HALFEST_DIVIDER + TRIPLET_DIVIDER;
+bool isFifthlet (uint16_t maybeFifthlet) {
+	return isDivisibleBy(FIFTH_DIVIDER, maybeFifthlet);
+}
+
 bool isFinishedNumber (uint16_t expectNumber) {
-	return isHalfest(expectNumber) || isTriplet(expectNumber);
+	return isHalfest(expectNumber) || isTriplet(expectNumber) || isFifthlet(expectNumber);
 }
 
 bool isNaturalNumber (uint16_t expectNumber) {

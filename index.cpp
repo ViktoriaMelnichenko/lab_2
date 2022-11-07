@@ -65,13 +65,22 @@ void outLine (std::string out) {
 }
 
 void onError (std::string errorMessage) {
-	using namespace std;
 	outLine(errorMessage);
 	outLine(TRY_AGAIN);
 	outLine(EXIT_MESSAGE);
 }
 
-void lab_1 (std::string inputNumbers) {
+void validateNumericLength (std::string value) {
+	if (value.length() > FACTOR + 1) throw std::invalid_argument(ERROR_INPUT + " > " + value);
+}
+
+void validateMaximumNumber (uint16_t value) {
+	if (value > MAXIMUM) {
+		throw std::invalid_argument(ERROR_INPUT + " > (" + std::to_string(value) + ") максимальне значенна: " + std::to_string(MAXIMUM));
+	}
+}
+
+std::string filterToFirstNaturalNumeric (std::string inputNumbers) {
 	uint32_t size = inputNumbers.length();
 	uint32_t index;
 	uint16_t numberTmp;
@@ -82,23 +91,38 @@ void lab_1 (std::string inputNumbers) {
 	  currentChar = inputNumbers[index];
 	  if (isSpaceing(currentChar)) {
 			if (isEmpty(stringTmp)) continue;
-			if (stringTmp.length() > FACTOR + 1) throw std::invalid_argument(ERROR_INPUT + " > " + stringTmp);
-			try {
-				numberTmp = std::stoi(stringTmp);
+			else validateNumericLength(stringTmp);
+		  try {
+			  numberTmp = std::stoi(stringTmp);
 				stringTmp = "";
-			} catch (std::exception &e) {
-				throw std::invalid_argument(ERROR_INPUT + " > " + stringTmp);
-			}
+		  } catch (std::exception &e) {
+			  throw std::invalid_argument(ERROR_INPUT + " > " + stringTmp);
+		  }
 			if (numberTmp == EXIT_NUMBER) break;
-			if (numberTmp > MAXIMUM) throw std::invalid_argument(ERROR_INPUT + " > (" + std::to_string(numberTmp) + ") максимальне значенна: " + std::to_string(MAXIMUM));
-			output += std::to_string(numberTmp) + ' ';
+			else validateMaximumNumber(numberTmp);
+			output += std::to_string(numberTmp) + " ";
 			if (isNaturalNumber(numberTmp)) break;
-	  }
-	  stringTmp += inputNumbers[index];
+	  } else {
+			stringTmp += inputNumbers[index];
+		}
   }
-	std::cout << output;
-	output = "";
-	return;
+	if (isNoEmpty(stringTmp)) {
+		validateNumericLength(stringTmp);
+		try {
+			numberTmp = std::stoi(stringTmp);
+			stringTmp = "";
+		} catch (std::exception &e) {
+			throw std::invalid_argument(ERROR_INPUT + " > " + stringTmp);
+		}
+		if (numberTmp != EXIT_NUMBER) {
+			validateMaximumNumber(numberTmp);
+			output += std::to_string(numberTmp) + " ";
+		}
+	}
+
+	if (isEmpty(output)) throw std::invalid_argument(EMPTY_COMMAND_MESSAGE);
+
+	return output;
 }
 
 void help () {
@@ -111,22 +135,24 @@ void help () {
 		<< "включаючи його чи всю послідовність,"
 		<< "якщо простий елемент відсутній."
 		<< "Значення елементів послідовності не перевищують > "
-		<< std::to_string(NOTATION) << std::to_string(FACTOR)
+		<< to_string(NOTATION) << to_string(FACTOR)
 		<< endl << endl
 		<< "----------------------"
 		<< endl << EXIT_MESSAGE << endl;
 }
 
 void programManager () {
-	std::string inputNumbers;
+	std::string inputNumerics;
 	outLine("введіть значення послідовності: ");
-	while(isEmpty(inputNumbers)) {
-		std::getline(std::cin, inputNumbers);
+	while(isEmpty(inputNumerics)) {
+		std::getline(std::cin, inputNumerics);
 	}
+
 	try {
-		if (isEmpty(inputNumbers)) throw std::invalid_argument(EMPTY_COMMAND_MESSAGE);
-		if (inputNumbers == EXIT_COMMAND) return;
-		return lab_1(inputNumbers);
+		if (isEmpty(inputNumerics)) throw std::invalid_argument(EMPTY_COMMAND_MESSAGE);
+		if (inputNumerics == EXIT_COMMAND) return;
+		std::string filteredNumerics = filterToFirstNaturalNumeric(inputNumerics);
+		std::cout << filteredNumerics;
 	} catch (std::exception& error) {
 		onError(error.what());
 		return programManager(); // restart this

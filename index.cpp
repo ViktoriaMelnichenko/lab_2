@@ -17,7 +17,6 @@ uint16_t GetFixedInput (uint8_t factor) {
 	return pow(NOTATION, factor);
 }
 const uint8_t  FACTOR  = 3;
-const uint8_t  MINIMUM = 0;
 const uint16_t MAXIMUM = GetFixedInput(FACTOR);
 
 bool isDivisibleBy (uint8_t divider, uint16_t expectNumber) {
@@ -40,18 +39,6 @@ bool isFinishedNumber (uint16_t expectNumber) {
 
 bool isNaturalNumber (uint16_t expectNumber) {
 	return !isFinishedNumber(expectNumber);
-}
-
-bool isRange (uint8_t minimum, uint16_t maximum, uint16_t expectNumber) {
-	return expectNumber >= minimum && expectNumber <= maximum;
-}
-
-bool isPositiveAndMaximum (uint16_t maximum, uint16_t expectNumber) {
-	return isRange(MINIMUM, maximum, expectNumber);
-}
-
-bool isValidInputNumber (uint16_t expectNumber) {
-	return isPositiveAndMaximum(MAXIMUM, expectNumber);
 }
 
 bool isNoEmpty (std::string expectString) {
@@ -94,23 +81,17 @@ void lab_1 (std::string inputNumbers) {
   for (index = 0; index < size; index++) {
 	  currentChar = inputNumbers[index];
 	  if (isSpaceing(currentChar)) {
-			if (isNoEmpty(stringTmp)) {
+			if (isEmpty(stringTmp)) continue;
+			try {
 				numberTmp = std::stoi(stringTmp);
 				stringTmp = "";
-				if (isValidInputNumber(numberTmp)) {
-					if (numberTmp == EXIT_NUMBER) {
-						std::cout << output;
-						output = "";
-						return;
-					}
-					output += std::to_string(numberTmp) + ' ';
-					if (isNaturalNumber(numberTmp)) {
-						std::cout << output;
-						output = "";
-						return;
-					}
-				}
+			} catch (std::exception &e) {
+				throw std::invalid_argument(ERROR_INPUT);
 			}
+			if (numberTmp == EXIT_NUMBER) break;
+			if (numberTmp > MAXIMUM) throw std::invalid_argument(ERROR_INPUT);
+			output += std::to_string(numberTmp) + ' ';
+			if (isNaturalNumber(numberTmp)) break;
 	  }
 	  stringTmp += inputNumbers[index];
   }
@@ -128,21 +109,14 @@ void help () {
 		<< "Вивести в рядок значення елементів послідовності до першого простого значення,"
 		<< "включаючи його чи всю послідовність,"
 		<< "якщо простий елемент відсутній."
-		<< "Значення елементів послідовності не перевищують 103."
+		<< "Значення елементів послідовності не перевищують > "
+		<< std::to_string(NOTATION) << std::to_string(FACTOR)
 		<< endl << endl
 		<< "----------------------"
 		<< endl << EXIT_MESSAGE << endl;
 }
 
-bool onRetry () {
-	std::string retry;
-	outLine("Повторити спробу? [y]");
-	std::cin >> retry;
-	return retry == "y";
-}
-
 void programManager () {
-	help();
 	std::string inputNumbers;
 	outLine("введіть значення послідовності: ");
 	while(isEmpty(inputNumbers)) {
@@ -154,14 +128,14 @@ void programManager () {
 		return lab_1(inputNumbers);
 	} catch (std::exception& error) {
 		onError(error.what());
-		if (onRetry()) return programManager(); // restart this
-		return;
+		return programManager(); // restart this
 	}
 
 	return;
 }
 
 int main () {
+	help();
 	programManager();
 	return 0;
 }

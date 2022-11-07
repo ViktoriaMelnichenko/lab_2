@@ -82,14 +82,15 @@ void lab_1 (std::string inputNumbers) {
 	  currentChar = inputNumbers[index];
 	  if (isSpaceing(currentChar)) {
 			if (isEmpty(stringTmp)) continue;
+			if (stringTmp.length() > FACTOR + 1) throw std::invalid_argument(ERROR_INPUT + " > " + stringTmp);
 			try {
 				numberTmp = std::stoi(stringTmp);
 				stringTmp = "";
 			} catch (std::exception &e) {
-				throw std::invalid_argument(ERROR_INPUT);
+				throw std::invalid_argument(ERROR_INPUT + " > " + stringTmp);
 			}
 			if (numberTmp == EXIT_NUMBER) break;
-			if (numberTmp > MAXIMUM) throw std::invalid_argument(ERROR_INPUT);
+			if (numberTmp > MAXIMUM) throw std::invalid_argument(ERROR_INPUT + " > (" + std::to_string(numberTmp) + ") максимальне значенна: " + std::to_string(MAXIMUM));
 			output += std::to_string(numberTmp) + ' ';
 			if (isNaturalNumber(numberTmp)) break;
 	  }
